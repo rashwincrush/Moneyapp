@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyApp - Transaction Scanner</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='favicon.ico') }}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex">
+                        <div class="flex-shrink-0 flex items-center">
+                            <h1 class="text-2xl font-bold text-indigo-600">MoneyApp</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="flex flex-row w-full">
+                <!-- Left side - Transaction list -->
+                <div class="flex-1 p-4">
+                    <div class="bg-white shadow-lg rounded-lg p-6">
+                        <!-- Summary Cards -->
+                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
+                            <div class="bg-white overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Credit</dt>
+                                    <dd class="mt-1 text-3xl font-semibold text-green-600" id="totalCredit">₹0.00</dd>
+                                </div>
+                            </div>
+                            <div class="bg-white overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Debit</dt>
+                                    <dd class="mt-1 text-3xl font-semibold text-red-600" id="totalDebit">₹0.00</dd>
+                                </div>
+                            </div>
+                            <div class="bg-white overflow-hidden shadow rounded-lg">
+                                <div class="px-4 py-5 sm:p-6">
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Net Balance</dt>
+                                    <dd class="mt-1 text-3xl font-semibold text-gray-900" id="netBalance">₹0.00</dd>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload Section -->
+                        <div class="bg-white shadow sm:rounded-lg mb-8">
+                            <div class="px-4 py-5 sm:p-6">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Upload Transactions</h3>
+                                    <button id="clearAll" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Clear All Data
+                                    </button>
+                                </div>
+
+                                <!-- Tabs -->
+                                <div class="mt-4 border-b border-gray-200">
+                                    <nav class="-mb-px flex" aria-label="Tabs">
+                                        <button id="screenshotTab" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm mr-8 active">
+                                            Screenshots
+                                        </button>
+                                        <button id="statementTab" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                                            Bank Statements
+                                        </button>
+                                    </nav>
+                                </div>
+
+                                <!-- Screenshot Upload -->
+                                <div id="screenshotUpload" class="mt-5">
+                                    <div class="mt-2 max-w-xl text-sm text-gray-500">
+                                        <p>Upload one or more screenshots of your transactions to process them automatically.</p>
+                                    </div>
+                                    <form id="uploadForm" class="mt-5">
+                                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6" id="dropZone">
+                                            <input type="file" id="fileInput" class="hidden" accept="image/*" multiple>
+                                            <label for="fileInput" class="cursor-pointer">
+                                                <div class="text-center">
+                                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    <p class="mt-1 text-sm text-gray-600">
+                                                        <span class="text-indigo-600 hover:text-indigo-500">Upload screenshots</span> or drag and drop
+                                                    </p>
+                                                    <p class="mt-1 text-xs text-gray-500">PNG, JPG up to 10MB each</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Bank Statement Upload -->
+                                <div id="statementUpload" class="mt-5 hidden">
+                                    <div class="mt-2 max-w-xl text-sm text-gray-500">
+                                        <p>Upload your bank statements (PDF, CSV) or transaction images (PNG, JPG) to process transactions automatically.</p>
+                                        <p class="mt-1">Supported banks: HDFC, SBI, ICICI, Axis, Kotak</p>
+                                    </div>
+                                    <form id="statementForm" class="mt-5">
+                                        <div class="mt-4">
+                                            <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative cursor-pointer hover:border-indigo-500 transition-colors">
+                                                <div class="space-y-1 text-center">
+                                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                    <div class="flex text-sm text-gray-600">
+                                                        <label for="statementInput" class="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                                            <span>Upload files</span>
+                                                            <input id="statementInput" name="statement" type="file" class="sr-only" multiple accept=".pdf,.csv,.png,.jpg,.jpeg">
+                                                        </label>
+                                                        <p class="pl-1">or drag and drop</p>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500">PDF, CSV, PNG, JPG up to 10MB each</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transactions Table -->
+                        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                            <div class="px-4 py-5 sm:px-6">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Transactions</h3>
+                            </div>
+                            <div class="border-t border-gray-200">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" id="dateSort">
+                                                    Date
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Description
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Bank
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Amount
+                                                </th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Category
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200" id="transactionsBody">
+                                            <!-- Transactions will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Submit Categories button below the table -->
+                            <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                                <button id="submitCategories" 
+                                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Submit Categories
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side - Charts -->
+                <div class="w-1/3 p-4">
+                    <div class="bg-white shadow-lg rounded-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Category Analysis</h2>
+                        <div class="mb-4" style="height: 300px; width: 300px;">
+                            <canvas id="categoryPieChart"></canvas>
+                        </div>
+                        <div class="mb-4" style="height: 300px; width: 300px;">
+                            <canvas id="categoryBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>
